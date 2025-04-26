@@ -255,7 +255,7 @@ button:hover, .btn:hover {
 
 .task-content {
     flex: 1;
-    min-width: 0; /* Prevent flex item overflow */
+    min-width: 0; 
 }
 
 .task-title {

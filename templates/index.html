@@ -110,7 +110,7 @@
         {% endfor %}
     </ul>
 
-    <!-- Add at the bottom of your content block -->
+    
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -137,7 +137,6 @@
                         const result = await response.json();
                         if (!response.ok) {
                             console.error('Reordering failed:', result.error);
-                            // Optional: revert the UI if the request fails
                             window.location.reload();
                         }
                     } catch (error) {

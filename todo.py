@@ -31,7 +31,7 @@ def load_tasks(user_id):
                     "task": "",
                     "priority": "Medium",
                     "due_date": None,
-                    "tags": [],  # Initialize tags as empty list
+                    "tags": [],  
                     "id": str(uuid.uuid4()),
                     'category': 'other'
                 }
@@ -47,17 +47,17 @@ def load_tasks(user_id):
                 
                 for part in parts[1:]:
                     if part.startswith("priority="):
-                        task["priority"] = part[9:]  # 9 is len("priority=")
+                        task["priority"] = part[9:]  
                     elif part.startswith("due="):
-                        task["due_date"] = part[4:]  # 4 is len("due=")
+                        task["due_date"] = part[4:]  
                     elif part.startswith("id="):
-                        task["id"] = part[3:]  # 3 is len("id=")
+                        task["id"] = part[3:]  
                     elif part.startswith("tags="):
                          task["tags"] = [t.strip() for t in part[5:].split(",") if t.strip()]
                     elif part.startswith("category="):
-                        task["category"] = part[9:] # len("category=")
+                        task["category"] = part[9:] 
                 
-                # Ensure task has an ID
+                
                 if not task.get("id"):
                     task["id"] = str(uuid.uuid4())
 
@@ -104,7 +104,7 @@ def sort_tasks(tasks):
         due = task.get("due_date")
         if due and due != "No due date":
             try:
-                # Use datetime.strptime instead of datetime.datetime.strptime
+                
                 datetime.strptime(due, "%Y-%m-%d")
                 tasks_with_due.append(task)
             except ValueError:
@@ -112,7 +112,7 @@ def sort_tasks(tasks):
         else:
             tasks_without_due.append(task)
 
-    # Sort using datetime.strptime
+    
     tasks_with_due.sort(key=lambda x: datetime.strptime(x['due_date'], "%Y-%m-%d"))
     return tasks_with_due + tasks_without_due
 
@@ -138,7 +138,7 @@ def get_due_status(due_date):
         return ""
     try:
         due = datetime.strptime(due_date, "%Y-%m-%d").date()
-        today = date.today()  # Use date.today() instead of datetime.today()
+        today = date.today()  
         delta = (due - today).days
         
         if delta < 0:

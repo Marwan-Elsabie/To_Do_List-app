@@ -55,7 +55,7 @@ class Task(db.Model):
 
     def __init__(self, **kwargs):
         super(Task, self).__init__(**kwargs)
-        # Set position to last by default
+        
         if self.position is None:
             last_task = Task.query.order_by(Task.position.desc()).first()
             self.position = (last_task.position + 1) if last_task else 0
@@ -199,7 +199,7 @@ def add():
         flash("Task description cannot be empty", "error")
         return redirect(url_for('index'))
     
-    # Get and parse the due date if provided
+    
     due_date_str = request.form.get("due_date")
     due_date = None
     if due_date_str:
@@ -209,17 +209,17 @@ def add():
             flash("Invalid date format. Please use YYYY-MM-DD", "error")
             return redirect(url_for('index'))
     
-    # Get tags if provided
+    
     tags = request.form.get("tags", "").strip()
     
-    # Create new task with current user's ID
+    
     new_task = Task(
         title=task_text,
         priority=request.form.get("priority", "Medium"),
         due_date=due_date,
         category=request.form.get("category", "other"),
         tags=tags,
-        user_id=current_user.id  # This ensures task belongs to current user
+        user_id=current_user.id  
     )
     
     try:
@@ -246,7 +246,7 @@ def toggle(task_id):
 def delete(task_id):
     task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     
-    # For soft delete (recommended)
+    
     task.deleted_at = datetime.utcnow()
     db.session.commit()
     
@@ -290,7 +290,7 @@ def reorder_tasks():
     try:
         new_order = request.json.get('order', [])
         
-        # Verify all tasks belong to current user
+        
         user_tasks = {t.id: t for t in Task.query.filter_by(user_id=current_user.id).all()}
         invalid_tasks = [tid for tid in new_order if tid not in user_tasks]
         
