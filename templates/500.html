@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="error-container">
+    <h1>500 - Server Error</h1>
+    <p>Something went wrong on our end. We're working to fix it!</p>
+    <a href="{{ url_for('index') }}" class="btn">Return to To-Do List</a>
+</div>
+{% endblock %}

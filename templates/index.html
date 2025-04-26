@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>To-Do List</h1>
+
+    <div class="user-info">
+        {% if current_user.is_authenticated %}
+            <span>Welcome, {{ username }}!</span>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </div>
+        
+    <form method="POST" action="{{ url_for('add') }}">
+        <input type="text" name="task" placeholder="Enter task" required>
+        <input type="text" name="tags" placeholder="Tags (comma separated)">
+        <input type="date" name="due_date">
+        <select name="priority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+        </select>
+        <select name="category" class="category-select">
+            {% for name, color in categories.items() %}
+            <option value="{{ name }}" 
+                    style="background-color: {{ color }}; color: white;">
+                {{ name|title }}
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <div class="filters">
+        <form method="GET" action="/" class="filter-form">
+            <select name="filter">
+                <option value="all" {% if current_filter == 'all' %}selected{% endif %}>All Tasks</option>
+                <option value="active" {% if current_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="completed" {% if current_filter == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="high" {% if current_filter == 'high' %}selected{% endif %}>High Priority</option>
+                <option value="medium" {% if current_filter == 'medium' %}selected{% endif %}>Medium Priority</option>
+                <option value="low" {% if current_filter == 'low' %}selected{% endif %}>Low Priority</option>
+            </select>
+            
+            <input type="text" name="tag" placeholder="Filter by tag" value="{{ current_tag }}">
+            <button type="submit">Filter</button>
+            {% if current_filter != 'all' or current_tag %}
+            <a href="/" class="clear-filter">Clear All</a>
+            {% endif %}
+        </form>
+        
+        {% if current_filter != 'all' or current_tag %}
+        <div class="active-filters">
+            {% if current_filter != 'all' %}
+            <span class="filter-badge">Filter: {{ current_filter|title }}</span>
+            {% endif %}
+            {% if current_tag %}
+            <span class="filter-badge">Tag: {{ current_tag }}</span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <ul class="task-list" id="sortable-tasks">
+        {% for task in tasks %}
+        <li class="task-item {{ get_due_status(task.due_date) }} {% if task.done %}done{% endif %}" 
+            style="border-left: 4px solid {{ categories.get(task.category, 'other') }};"
+            data-task-id="{{ task.id }}">
+            
+            <div class="task-content">
+                <span class="task-status {{ 'done' if task.done else 'not-done' }}">
+                    <input type="checkbox" class="task-checkbox" 
+                        onchange="window.location.href='{{ url_for('toggle', task_id=task.id) }}'" 
+                        {{ 'checked' if task.done }}>
+                    {{ task.task }}
+                </span>
+                
+                <div class="task-meta">
+                    {% if task.due_date and task.due_date != 'No due date' %}
+                    <span class="due-date">{{ task.due_date }}</span>
+                    {% endif %}
+                    
+                    <span class="priority-badge priority-{{ task.priority|lower }}">
+                        {{ task.priority }}
+                    </span>
+                    
+                    <span class="category-badge" 
+                        style="background-color: {{ categories.get(task.category, 'other') }};">
+                        {{ task.category|default('other')|title }}
+                    </span>
+                    
+                    {% if task.tags %}
+                    <span class="task-tags">
+                        {% for tag in task.tags %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="task-actions">
+                <a href="{{ url_for('edit', task_id=task.id) }}" class="edit-btn" title="Edit task">✎</a>
+                <a href="{{ url_for('delete', task_id=task.id) }}" class="delete-btn" title="Delete task">✕</a>
+            </div>
+        </li>
+            {% else %}
+            <li class="empty-state">No tasks yet. Add one above!</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Add at the bottom of your content block -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskList = document.getElementById('sortable-tasks');
+            
+            new Sortable(taskList, {
+                animation: 150,
+                handle: '.task-content',
+                ghostClass: 'dragging-task',
+                onEnd: async () => {
+                    const taskIds = Array.from(taskList.children)
+                        .map(el => el.dataset.taskId);
+                    
+                    try {
+                        const response = await fetch('/reorder-tasks', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ order: taskIds })
+                        });
+                        
+                        const result = await response.json();
+                        if (!response.ok) {
+                            console.error('Reordering failed:', result.error);
+                            // Optional: revert the UI if the request fails
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        console.error('Network error:', error);
+                        window.location.reload();
+                    }
+                }
+            });
+        });
+        </script>
+{% endblock %}
