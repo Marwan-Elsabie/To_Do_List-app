@@ -14,7 +14,7 @@ from datetime import datetime, date
 load_dotenv() 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///tasks.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/Marwan777/todo-app/instance/tasks.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('SECRET_KEY', 'your-very-secret-key-here')
 
@@ -23,7 +23,7 @@ migrate = Migrate(app, db)
 
 # Initialize Login Manager
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'  # Make sure this points to your login route name
+login_manager.login_view = 'login'  
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'error'
 
@@ -89,7 +89,7 @@ def load_user(user_id):
 # Authentication Routes
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Redirect already authenticated users
+    
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     
@@ -384,4 +384,4 @@ with app.app_context():
         db.session.commit()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=10000)
+    app.run(debug=True) 
