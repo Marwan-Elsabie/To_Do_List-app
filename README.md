@@ -19,7 +19,7 @@ A full-featured task management web application with user authentication, dark m
 
 ## 🚀 Live Demo
 
-[Try it live here!](Marwan777.pythonanywhere.com) 
+[Try it live here!](https://marwan777.pythonanywhere.com/login?next=%2F) 
 
 ## 📦 Installation
 
